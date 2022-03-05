@@ -15,3 +15,11 @@ make
 ```
 
 All images with watermark will locate in `/output` folder under the input path.
+
+## Example
+
+```
+./timestamp -path=./example
+```
+Check the pic with date watermark in `./example/output`!
+
