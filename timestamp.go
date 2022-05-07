@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/BurntSushi/graphics-go/graphics"
 	"github.com/golang/freetype"
@@ -37,9 +38,10 @@ func main() {
 
 	fs, _ := ioutil.ReadDir(path)
 	for _, file := range fs {
-		if !file.IsDir() && strings.ToLower(filepath.Ext(path+file.Name())) == ".jpg" {
-			guard <- struct{}{}
+		extension := strings.ToLower(filepath.Ext(path + file.Name()))
+		if !file.IsDir() && (extension == ".jpg" || extension == ".jpeg") {
 			wg.Add(1)
+			guard <- struct{}{}
 
 			fmt.Println(path + file.Name())
 			go func(name string, path string) {
@@ -132,7 +134,9 @@ func addTimestampWaterMark(name string, rootPath string) error {
 	// 4. add timestamp label to the pic
 	imageRGBA := imageToNRGBA(img)
 	fmt.Println(posX, posY, fontSize)
-	addLabel(imageRGBA, posX, posY, tm.Format("2006-01-02"), fontSize)
+	if tm.After(time.Now().Add(-30 * 365 * 24 * time.Hour)) {
+		addLabel(imageRGBA, posX, posY, tm.Format("2006-01-02"), fontSize)
+	}
 
 	// 5. export the pic
 	outputPath := rootPath + "output/"
