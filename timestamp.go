@@ -35,6 +35,8 @@ func main() {
 	var wg = sync.WaitGroup{}
 	maxGoroutines := 30
 	guard := make(chan struct{}, maxGoroutines)
+	mu := &sync.Mutex{}
+	errors := []string{}
 
 	fs, _ := ioutil.ReadDir(path)
 	for _, file := range fs {
@@ -48,6 +50,9 @@ func main() {
 				err := addTimestampWaterMark(name, path)
 				if err != nil {
 					fmt.Println(err)
+					mu.Lock()
+					errors = append(errors, name)
+					mu.Unlock()
 				}
 
 				<-guard
@@ -57,6 +62,12 @@ func main() {
 	}
 
 	wg.Wait()
+
+	fmt.Println("ERRORS : -----------------------")
+	for _, errFile := range errors {
+		fmt.Println(errFile)
+	}
+	fmt.Println("--------------------------------")
 }
 
 func addTimestampWaterMark(name string, rootPath string) error {
@@ -122,13 +133,13 @@ func addTimestampWaterMark(name string, rootPath string) error {
 	posX := 3 * width / 4
 	posY := 12 * height / 13
 	var fontSize float64
-	fontSize = float64(140.0 * width / 4000.0)
+	fontSize = float64(180.0 * width / 4000.0)
 	fmt.Println(width)
 	fmt.Println(height)
 	if width > height {
 		posX = 5 * width / 6
 		posY = 9 * height / 10
-		fontSize = float64(140.0 * width / 6000.0)
+		fontSize = float64(180.0 * width / 6000.0)
 	}
 
 	// 4. add timestamp label to the pic
@@ -186,7 +197,7 @@ func addLabel(img *image.NRGBA, x, y int, label string, fontSize float64) {
 }
 
 func init() {
-	fontBytes, err := ioutil.ReadFile("./OpenSans-Bold.ttf")
+	fontBytes, err := ioutil.ReadFile("./TickingTimebombBB.ttf")
 	if err != nil {
 		fmt.Println(err)
 		return
